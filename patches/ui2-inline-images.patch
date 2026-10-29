@@ -1,0 +1,26 @@
+--- a/ui/ui.v
++++ b/ui/ui.v
+@@ -290,8 +290,11 @@
+ 
+ pub struct TextRun {
+ pub:
+-	text  string
+-	style TextStyle
++	text         string
++	style        TextStyle
++	image_path   string
++	image_width  f64
++	image_height f64
+ }
+ 
+ pub enum TextFormat {
+--- a/appkit/ui_macos_darwin.v
++++ b/appkit/ui_macos_darwin.v
+@@ -2581,6 +2581,7 @@
+ 		if length > 0 {
+ 			native_text_view_add_style(tv, location, length, run.style.color, run.style.background_color, run.style.size, run.style.font_family, run.style.bold, run.style.italic, run.style.underline, run.style.strikethrough, run.style.vertical_align)
+ 			native_text_view_add_effect(tv, location, length, text_style_effect_value(run.style))
++			native_text_view_add_image(tv, location, run)
+ 			if run.style.link.len > 0 {
+ 				native_text_view_add_link(tv, location, length, run.style.link)
+ 			}

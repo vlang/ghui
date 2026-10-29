@@ -1,0 +1,14 @@
+/ghgui
+/ghgui.exe
+/ghui
+/ghui.exe
+/Github.app/
+/Github Links.app/
+/.screenshots/
+/.build/
+.DS_Store
+/*_test
+/*_test.exe
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
