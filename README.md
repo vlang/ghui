@@ -11,6 +11,9 @@ make
 ./ghgui vlang/v
 ```
 
+<img width="1552" height="1004" alt="image" src="https://github.com/user-attachments/assets/9f920cbf-29d8-41ad-933c-b151f184ae1a" />
+
+
 If you already have a ui2 checkout, link it into `~/.vmodules/ui2` instead of
 installing another copy.
 
