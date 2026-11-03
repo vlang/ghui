@@ -151,6 +151,7 @@ fn build() ui2.Element {
 	if !app.initialized {
 		app.initialized = true
 		start_fetch(false)
+		spawn ci_counts_poll(app.repo, app.ci_counts_results)
 		if app.startup_url != '' {
 			target := app.startup_url
 			app.startup_url = ''
@@ -183,7 +184,15 @@ fn build() ui2.Element {
 				if app.apply_merge_result(merge_result) && app.kind == .prs {
 					start_fetch(false)
 					if app.active_issue == merge_result.request.issue.number { start_detail_fetch(false) }
+				} else if merge_result.error != '' {
+					// The head may have moved; look the PR up again before offering a retry.
+					number := merge_result.request.issue.number
+					app.merge_infos.delete(number)
+					app.merge_info_failed.delete(number)
 				}
+			}
+			info_result := <-app.merge_info_results {
+				app.apply_merge_info_result(info_result)
 			}
 			close_pr_result := <-app.close_pr_results {
 				if app.apply_close_pr_result(close_pr_result) && app.kind == .prs {
@@ -196,6 +205,12 @@ fn build() ui2.Element {
 					start_fetch(false)
 					if app.active_issue == ready_result.request.issue.number { start_detail_fetch(false) }
 				}
+			}
+			stop_ci_result := <-app.stop_ci_results {
+				if app.apply_stop_ci_result(stop_ci_result) { spawn ci_counts_once(app.repo, app.ci_counts_results) }
+			}
+			ci_counts := <-app.ci_counts_results {
+				app.apply_ci_counts(ci_counts)
 			}
 			comment_result := <-app.comment_results {
 				app.apply_comment_result(comment_result)
@@ -212,6 +227,9 @@ fn build() ui2.Element {
 				break
 			}
 		}
+	}
+	for number in app.pending_merge_info_numbers() {
+		spawn fetch_merge_info_in_background(app.repo, number, app.merge_info_results)
 	}
 	if app.pending_url_diff && app.active_issue > 0 && app.detail_loaded && !app.detail_loading {
 		app.pending_url_diff = false
@@ -372,6 +390,11 @@ fn handle_event(event string) {
 				spawn mark_ready_in_background(request, app.ready_results)
 			}
 		}
+		'stop_all_ci' {
+			if request := app.begin_stop_ci() {
+				spawn stop_ci_in_background(request, app.stop_ci_results)
+			}
+		}
 		'new_comment_text' {
 			// Only the Comment button depends on the draft, so typing does not
 			// redraw the whole discussion.
@@ -431,6 +454,10 @@ fn handle_event(event string) {
 				}
 			} else if event.starts_with('review_on_chatgpt:') {
 				start_chatgpt_review(event.all_after('review_on_chatgpt:'))
+			} else if event.starts_with('list_squash_merge_') {
+				if request := app.begin_list_squash_merge(event.all_after('list_squash_merge_').int()) {
+					spawn squash_merge_in_background(request, app.merge_results)
+				}
 			} else if event.starts_with('select_') {
 				app.toggle_selection(event.all_after('select_').int())
 			} else if event.starts_with('pointer:up:issue_') {

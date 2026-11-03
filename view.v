@@ -100,11 +100,18 @@ fn render_app_content(app &App, bounds ui2.Rect) ui2.Element {
 		accessibility_label: 'Refresh ${items}'
 	}
 	children << ui2.view('toolbar_separator', ui2.rect(margin + 306, 16, 1, 22), box(border, 0), [])
-	children << ui2.label('repository', app.repo.str(), ui2.rect(margin + 326, 12, math.max(1, width - 432), 30),
+	children << ui2.label('repository', app.repo.str(), ui2.rect(margin + 326, 12, math.max(1, width - 326 - 182 - 196), 30),
 		text_style(17, ink, true))
-	if width > 700 {
-		children << ui2.label('page_title', app.kind.label(), ui2.rect(w - margin - 80, 12, 80, 30),
-			ui2.TextStyle{ size: 13, color: muted, align: .right })
+	children << ui2.label('ci_counts', app.ci_counts_label(), ui2.rect(w - margin - 170 - 196, 12, 188, 30),
+		ui2.TextStyle{ size: 12, color: muted, align: .right })
+	stop_ci := ui2.button('stop_all_ci', if app.stop_ci_loading { 'Stopping CI…' } else { '■  Stop all CI' },
+		ui2.rect(w - margin - 170, 10, 170, 34), ui2.BoxStyle{ bg: red, radius: 6 },
+		ui2.TextStyle{ size: 14, color: 0xffffff, bold: true, align: .center })
+	children << ui2.Element{
+		...stop_ci
+		enabled:             app.can_stop_ci()
+		tooltip:             'Cancel every running or queued GitHub Actions run in ${app.repo}'
+		accessibility_label: 'Stop all CI jobs'
 	}
 	filtered := app.search_text() != '' || app.author != 'Author' || app.label != 'Labels'
 		|| app.assignee != 'Assignees' || app.milestone != 'Milestones'
@@ -169,6 +176,11 @@ fn render_app_content(app &App, bounds ui2.Rect) ui2.Element {
 		'${visible.len} shown · ${app.issues.len} of ${format_count(total)} ${app.state.to_lower()} loaded'
 	}
 	if app.selected.len > 0 { status += ' · ${app.selected.len} selected' }
+	if app.stop_ci_loading {
+		status += ' · Stopping CI runs…'
+	} else if app.stop_ci_message != '' {
+		status += ' · ${app.stop_ci_message}'
+	}
 	if app.storage_error != '' { status += ' · Could not save ${items} locally' }
 	children << ui2.with_tooltip(ui2.label('status', status, ui2.rect(margin, top + list_height + 6, math.max(1, width - 320), 22),
 		text_style(11, muted, false)), app.storage_error)
@@ -343,7 +355,7 @@ fn render_issue(app &App, issue Issue, width f64, y f64, now time.Time) ui2.Elem
 		' · merged ${relative_time(issue.merged_at, now)}'
 	} else {
 		''
-	}}${app.chatgpt_review_marker(issue)}'
+	}}${if issue.codex_review_passed() && issue.state != 'OPEN' { ' · review passed' } else { '' }}${app.chatgpt_review_marker(issue)}'
 	// Allow the additional merge timestamp to wrap on narrow windows.
 	meta_lines := if issue.kind == .prs && issue.state == 'MERGED' && issue.merged_at != ''
 		&& estimated_text_width(meta_text, 11) > meta_width {
@@ -370,6 +382,20 @@ fn render_issue(app &App, issue Issue, width f64, y f64, now time.Time) ui2.Elem
 				ui2.label('${id}_conflicts_text', 'Conflicts', ui2.rect(6, 0, 64, 18),
 					ui2.TextStyle{ size: 11, color: red, bold: true, align: .center }),
 			]), 'Resolve merge conflicts before squash merging.')
+	}
+	if issue.kind == .prs && issue.state == 'OPEN' && issue.codex_review_passed() {
+		label_x := 64 + estimated_text_width(meta_text, 11) + 8
+		children << ui2.label('${id}_review_passed', '✓ review passed', ui2.rect(label_x, meta_y, 96, 16),
+			ui2.TextStyle{ size: 11, color: green, bold: true, valign: .top })
+		if app.list_merge_ready(issue) && label_x + 96 + 118 < width - 96 - diff_width {
+			merging := app.merging_pr(issue.number)
+			failure := app.merge_errors[issue.number] or { '' }
+			button := ui2.button('list_squash_merge_${issue.number}', if merging { 'Merging…' } else if failure != '' { 'Retry merge' } else { 'Squash & merge' },
+				ui2.rect(label_x + 102, meta_y - 3, 118, 22), box(green, 6), text_style(11, 0xffffff, true))
+			children << ui2.Element{ ...button, enabled: !app.merge_loading && !app.ready_loading && !app.close_pr_loading,
+				tooltip: if failure != '' { 'Squash merge failed: ${failure}' } else { 'Squash this pull request into its base branch.' },
+				accessibility_label: 'Squash merge pull request #${issue.number}' }
+		}
 	}
 	if issue.kind == .prs {
 		children << ui2.with_tooltip(ui2.view('${id}_diff', ui2.rect(width - 96 - diff_width, meta_y, diff_width, 16),

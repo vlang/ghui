@@ -93,11 +93,24 @@ mut:
 	merge_request             MergeRequest
 	merge_errors              map[int]string
 	merge_results             chan MergeResult = chan MergeResult{cap: 1}
+	merge_infos               map[int]MergeInfo
+	merge_info_pending        map[int]bool
+	merge_info_failed         map[int]bool
+	merge_info_results        chan MergeInfoResult = chan MergeInfoResult{cap: 64}
 	ready_loading             bool
 	ready_generation          int
 	ready_request             ReadyRequest
 	ready_errors              map[int]string
 	ready_results             chan ReadyResult = chan ReadyResult{cap: 1}
+	stop_ci_loading           bool
+	stop_ci_generation        int
+	stop_ci_request           StopCiRequest
+	stop_ci_message           string
+	ci_in_progress            int
+	ci_queued                 int
+	ci_counts_known           bool
+	ci_counts_results         chan CiCountsResult = chan CiCountsResult{cap: 4}
+	stop_ci_results           chan StopCiResult = chan StopCiResult{cap: 1}
 	comment_drafts            map[int]string
 	repository_drafts         map[string]map[int]string
 	comment_loading           bool

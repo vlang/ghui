@@ -146,13 +146,19 @@ fn detail_layout(app &App, bounds ui2.Rect) DetailLayout {
 				tooltip: 'Mark this draft pull request ready for review on GitHub.',
 				accessibility_label: 'Mark pull request #${issue.number} ready for review' }
 		}
-		button := ui2.button('squash_merge', if app.merging_current_pr() { 'Merging…' } else { 'Squash merge' },
-			ui2.rect(if issue.is_draft { 308.0 } else { 132.0 }, y, 150, 32), box(green, 6), text_style(13, 0xffffff, true))
+		mut merge_x := if issue.is_draft { 308.0 } else { 132.0 }
+		if issue.codex_review_passed() {
+			children << ui2.label('review_passed', '✓ Review passed', ui2.rect(merge_x, y, 130, 32),
+				ui2.TextStyle{ size: 13, color: green, bold: true, valign: .middle })
+			merge_x += 136
+		}
+		button := ui2.button('squash_merge', if app.merging_current_pr() { 'Merging…' } else { 'Squash & merge' },
+			ui2.rect(merge_x, y, 150, 32), box(green, 6), text_style(13, 0xffffff, true))
 		children << ui2.Element{ ...button, enabled: app.can_squash_merge(),
 			tooltip: if issue.has_merge_conflicts() { 'Resolve merge conflicts and refresh before squash merging.' } else if issue.is_draft { 'Draft pull requests must be marked ready before merging.' } else { 'Squash this pull request into its base branch.' },
 			accessibility_label: 'Squash merge pull request #${issue.number}' }
 		close_button := ui2.button('close_pr', if app.closing_current_pr() { 'Closing…' } else { 'Close PR' },
-			ui2.rect(if issue.is_draft { 470.0 } else { 294.0 }, y, 130, 32), bordered_box(subtle, 6), text_style(13, red, true))
+			ui2.rect(merge_x + 162, y, 130, 32), bordered_box(subtle, 6), text_style(13, red, true))
 		children << ui2.Element{ ...close_button, enabled: app.can_close_pr(),
 			tooltip: 'Close this pull request without merging on GitHub.',
 			accessibility_label: 'Close pull request #${issue.number} without merging' }

@@ -79,6 +79,9 @@ fn markdown_blocks(node &markdown.Node, md markdown.Markdown, context BodyContex
 	mut blocks := []BodyBlock{}
 	match node.kind {
 		.heading, .paragraph, .code_block, .fenced_code, .html_block, .thematic_break {
+			if node.kind == .html_block && strip_html_comments(node.literal).trim_space() == '' {
+				return blocks
+			}
 			kind := match node.kind {
 				.heading { BodyKind.heading }
 				.code_block, .fenced_code { BodyKind.code }
@@ -90,7 +93,8 @@ fn markdown_blocks(node &markdown.Node, md markdown.Markdown, context BodyContex
 			style := body_style(kind, node.level)
 			// Code and HTML blocks are literal text, never reparsed as Markdown.
 			runs := if node.kind in [.code_block, .fenced_code, .html_block] {
-				[ui2.TextRun{ text: node.literal.trim_right('\n'), style: style }]
+				text := if node.kind == .html_block { strip_html_comments(node.literal).trim_space() } else { node.literal.trim_right('\n') }
+				[ui2.TextRun{ text: text, style: style }]
 			} else if kind == .rule {
 				[]ui2.TextRun{}
 			} else {
@@ -158,6 +162,21 @@ fn markdown_blocks(node &markdown.Node, md markdown.Markdown, context BodyContex
 		}
 	}
 	return blocks
+}
+
+fn strip_html_comments(s string) string {
+	mut out := ''
+	mut rest := s
+	for {
+		start := rest.index('<!--') or { break }
+		out += rest[..start]
+		end := rest[start + 4..].index('-->') or {
+			rest = ''
+			break
+		}
+		rest = rest[start + 4 + end + 3..]
+	}
+	return out + rest
 }
 
 fn markdown_inline_runs(node &markdown.Node, md markdown.Markdown, style ui2.TextStyle, repo Repository) []ui2.TextRun {

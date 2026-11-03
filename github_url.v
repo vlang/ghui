@@ -71,6 +71,9 @@ fn (mut app App) change_repository(repo Repository) bool {
 	app.close_errors.clear()
 	app.close_pr_errors.clear()
 	app.merge_errors.clear()
+	app.merge_infos.clear()
+	app.merge_info_pending.clear()
+	app.merge_info_failed.clear()
 	app.ready_errors.clear()
 	app.comment_generation++
 	app.comment_loading = false

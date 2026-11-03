@@ -150,6 +150,16 @@ fn (issue Issue) github_url(repo Repository) string {
 	return 'https://github.com/${repo}/${path}/${issue.number}'
 }
 
+// Codex's review bot reacts with a thumbs up when it finds no issues.
+fn (issue Issue) codex_review_passed() bool {
+	if issue.kind != .prs { return false }
+	for group in issue.reaction_groups {
+		if group.content != 'THUMBS_UP' { continue }
+		return group.reactors.nodes.any(it.login.to_lower().contains('codex'))
+	}
+	return false
+}
+
 fn (issue Issue) list_state() string {
 	return if issue.state == 'MERGED' { 'CLOSED' } else { issue.state }
 }

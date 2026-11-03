@@ -202,3 +202,15 @@ fn test_description_and_comments_use_selectable_rich_text() {
 		}
 	}
 }
+
+fn test_multiline_html_comments_are_skipped() {
+	body := '<!-- codex-pull-request-review-summary -->\n<!-- codex-review-state:v1 {"code_review":\n{"reviewed":"abc",\n\n"x":"<b>"}} -->\n\n### Review\nText <!-- inline\nhidden --> end'
+	blocks := body_blocks(body)
+	assert blocks.map(it.text).join('|') == 'Review|Text  end'
+}
+
+fn test_html_comment_blocks_are_skipped() {
+	blocks := body_blocks('<!-- a -->\n<!-- b {"x":1} -->\n\n## Summary')
+	assert blocks.len == 1
+	assert blocks[0].text == 'Summary'
+}
