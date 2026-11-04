@@ -103,7 +103,7 @@ fn open_github_destination(destination GithubDestination) {
 	old_kind := app.kind
 	app.change_kind(destination.kind)
 	app.close_issue()
-	ui2.set_window_title('GitHub · ${app.repo}')
+	set_app_window_title('GitHub · ${app.repo}')
 	if changed || old_kind != app.kind { start_fetch(false) }
 	if destination.number > 0 {
 		if destination.needs_lookup {

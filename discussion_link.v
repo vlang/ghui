@@ -3,7 +3,7 @@ module main
 import encoding.base64
 import json2
 import net.urllib
-import os as _
+import os
 
 const reference_query = r'query DiscussionReference($owner: String!, $name: String!, $number: Int!) {
   repository(owner: $owner, name: $name) {

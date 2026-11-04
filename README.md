@@ -17,8 +17,9 @@ make
 If you already have a ui2 checkout, link it into `~/.vmodules/ui2` instead of
 installing another copy.
 
-`make` uses a local ui2 copy in `.build/vmodules` with a small macOS rich-text
-patch that preserves inline styles and text selections during refresh.
+`make` uses a local ui2 copy in `.build/vmodules` with small patches that add
+inline images to macOS text views. ui2 must include commit `dc416d7` or later,
+which keeps inline styles and text selections when a text area refreshes.
 The installed ui2 module stays untouched. Set `UI2_SOURCE=/path/to/ui2` when
 building to use a checkout elsewhere.
 
