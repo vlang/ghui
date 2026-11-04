@@ -30,7 +30,7 @@ else
 	done
 fi
 
-for patch_file in "$patch_dir/ui2-rich-text.patch" "$patch_dir/ui2-inline-images.patch" "$patch_dir/ui2-pointer-cast.patch"; do
+for patch_file in "$patch_dir/ui2-inline-images.patch" "$patch_dir/ui2-pointer-cast.patch"; do
 	if patch --dry-run -f -s -d "$build_dir" -p1 < "$patch_file" >/dev/null 2>&1; then
 		patch -f -s -d "$build_dir" -p1 < "$patch_file"
 	elif patch --dry-run -R -f -s -d "$build_dir" -p1 < "$patch_file" >/dev/null 2>&1; then
