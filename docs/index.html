@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ghui — a fast native GitHub issue and PR browser</title>
+<meta name="description" content="ghui is a fast, native desktop browser for GitHub issues and pull requests, written in V. Filter, sort, review, and merge without a browser tab.">
+<meta property="og:title" content="ghui — native GitHub issues & PRs">
+<meta property="og:description" content="A fast desktop browser for GitHub issues and pull requests, written in V.">
+<meta property="og:image" content="hero.png">
+<link rel="icon" href="icon.png">
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--line:#30363d;--text:#e6edf3;--muted:#8b949e;--green:#2ea043;--accent:#58a6ff}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+nav{display:flex;align-items:center;justify-content:space-between;padding:20px 0}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:20px;color:var(--text)}
+.brand img{width:32px;height:32px;border-radius:8px}
+nav .links a{margin-left:22px;color:var(--muted);font-size:15px}
+nav .links a:hover{color:var(--text);text-decoration:none}
+.hero{text-align:center;padding:56px 0 24px;background:radial-gradient(60% 50% at 50% 0,rgba(46,160,67,.22),transparent 70%)}
+h1{font-size:clamp(36px,6vw,64px);line-height:1.1;margin:0 0 18px;letter-spacing:-.02em}
+h1 span{background:linear-gradient(90deg,#3fb950,#58a6ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{max-width:680px;margin:0 auto 32px;color:var(--muted);font-size:20px}
+.btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-block;padding:12px 22px;border-radius:8px;font-weight:600;border:1px solid var(--line);color:var(--text)}
+.btn:hover{text-decoration:none;border-color:var(--muted)}
+.btn.primary{background:var(--green);border-color:var(--green);color:#fff}
+.shot{margin:56px auto 0;max-width:1000px}
+.shot img{width:100%;height:auto;display:block;filter:drop-shadow(0 30px 60px rgba(0,0,0,.6))}
+section{padding:72px 0}
+h2{font-size:34px;margin:0 0 12px;text-align:center;letter-spacing:-.01em}
+.sub{text-align:center;color:var(--muted);max-width:640px;margin:0 auto 44px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px}
+.card h3{margin:0 0 8px;font-size:18px}
+.card p{margin:0;color:var(--muted);font-size:15px}
+.card .ic{font-size:26px;margin-bottom:10px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px;overflow:auto;font:14px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.install{max-width:720px;margin:0 auto}
+kbd{background:var(--panel);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 7px;font:13px ui-monospace,Menlo,monospace}
+table{border-collapse:collapse;margin:0 auto}
+td{padding:8px 18px;border-bottom:1px solid var(--line);color:var(--muted)}
+td:first-child{white-space:nowrap;color:var(--text)}
+footer{border-top:1px solid var(--line);padding:32px 0;color:var(--muted);text-align:center;font-size:14px}
+@media(max-width:600px){nav .links a:not(.gh){display:none}.lead{font-size:18px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="brand" href="#"><img src="icon.png" alt="">ghui</a>
+    <div class="links">
+      <a href="#features">Features</a>
+      <a href="#install">Install</a>
+      <a href="#shortcuts">Shortcuts</a>
+      <a class="gh" href="https://github.com/vlang/ghui">GitHub</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <h1>GitHub issues &amp; PRs,<br><span>at native speed.</span></h1>
+    <p class="lead">ghui is a fast desktop browser for GitHub issues and pull requests, written in V. Triage, review, and merge without a single browser tab.</p>
+    <div class="btns">
+      <a class="btn primary" href="#install">Get started</a>
+      <a class="btn" href="https://github.com/vlang/ghui">View on GitHub</a>
+    </div>
+    <div class="shot"><img src="hero.png" alt="ghui showing the open pull requests of vlang/v" width="1600"></div>
+  </header>
+</div>
+
+<section id="features">
+  <div class="wrap">
+    <h2>Built for people who live in GitHub</h2>
+    <p class="sub">Everything loads in the background, is stored locally in SQLite, and uses your existing GitHub CLI login — private repositories included.</p>
+    <div class="grid">
+      <div class="card"><div class="ic">⚡</div><h3>Instant lists</h3><p>Stored issues and PRs appear before GitHub responds. Rows load progressively, and sorting and filtering are local with no API calls.</p></div>
+      <div class="card"><div class="ic">🔎</div><h3>Filter &amp; sort</h3><p>Search by title, number or author, narrow by label, milestone and assignee, and sort by newest, activity, or comment count.</p></div>
+      <div class="card"><div class="ic">🔀</div><h3>Review &amp; merge</h3><p>Read full diffs with colored additions and deletions, squash merge, close, or mark drafts ready for review right from the app.</p></div>
+      <div class="card"><div class="ic">💬</div><h3>Discussions</h3><p>Rich Markdown rendering, inline images, reactions with tooltips, and replying with <kbd>⌘↩</kbd> — all selectable and native.</p></div>
+      <div class="card"><div class="ic">🚦</div><h3>CI at a glance</h3><p>See running and queued CI jobs for the repo and stop them all with one click when the queue gets out of hand.</p></div>
+      <div class="card"><div class="ic">🔗</div><h3>Link routing</h3><p>Optionally open GitHub links from any Mac app inside ghui, falling back to your browser for everything else.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="install" style="background:var(--panel)">
+  <div class="wrap install">
+    <h2>Install</h2>
+    <p class="sub">Requires <a href="https://vlang.io">V</a> 0.5.2+, <a href="https://github.com/vlang/ui2">ui2</a>, and the <a href="https://cli.github.com">GitHub CLI</a>.</p>
+<pre><code>v install https://github.com/vlang/ui2
+gh auth login
+git clone https://github.com/vlang/ghui
+cd ghui
+make
+./ghgui vlang/v</code></pre>
+    <p class="sub" style="margin-top:24px">On macOS, run <code>make app</code> to build <code>Github.app</code>, then <code>make install-links</code> to route GitHub links into it. Add <code>--prs</code> to start in PR mode.</p>
+  </div>
+</section>
+
+<section id="shortcuts">
+  <div class="wrap">
+    <h2>Shortcuts</h2>
+    <p class="sub">Keep your hands on the keyboard.</p>
+    <table>
+      <tr><td><kbd>⌘R</kbd> / <kbd>Ctrl+R</kbd> / <kbd>F5</kbd></td><td>Refresh</td></tr>
+      <tr><td><kbd>⌘F</kbd> / <kbd>Ctrl+F</kbd></td><td>Focus the filter</td></tr>
+      <tr><td><kbd>⌘G</kbd> / <kbd>Ctrl+G</kbd></td><td>Open a pull request by number</td></tr>
+      <tr><td><kbd>⌘↩</kbd> / <kbd>Ctrl+Enter</kbd></td><td>Post comment</td></tr>
+      <tr><td><kbd>Esc</kbd></td><td>Back to the list</td></tr>
+    </table>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">ghui is open source under the <a href="https://github.com/vlang/ghui/blob/master/LICENSE">license</a> in its repository · Built with <a href="https://vlang.io">V</a></div>
+</footer>
+</body>
+</html>
